@@ -51,13 +51,18 @@ def calculate_base_tax_from_tax_slabs(annual_taxable_earning, tax_slab, eval_glo
 		cond = cstr(slab.condition).strip()
 		if cond and not eval_tax_slab_condition(cond, eval_globals, eval_locals):
 			continue
+		# Stixor: each slab carries a fixed amount (the tax due on all lower slabs, as in
+		# FBR's tables) plus a percentage of the income above the slab's start. Only the
+		# slab the income falls into is charged; lower slabs are covered by fixed_deduction.
 		if not slab.to_amount and annual_taxable_earning >= slab.from_amount:
-			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
+			tax_amount += flt(slab.fixed_deduction) + (
+				(annual_taxable_earning - slab.from_amount) * slab.percent_deduction * 0.01
+			)
 			continue
 		if annual_taxable_earning >= slab.from_amount and annual_taxable_earning < slab.to_amount:
-			tax_amount += (annual_taxable_earning - slab.from_amount + 1) * slab.percent_deduction * 0.01
-		elif annual_taxable_earning >= slab.from_amount and annual_taxable_earning >= slab.to_amount:
-			tax_amount += (slab.to_amount - slab.from_amount + 1) * slab.percent_deduction * 0.01
+			tax_amount += flt(slab.fixed_deduction) + (
+				(annual_taxable_earning - slab.from_amount) * slab.percent_deduction * 0.01
+			)
 	return tax_amount
 
 
