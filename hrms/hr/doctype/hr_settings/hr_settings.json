@@ -27,7 +27,9 @@
   "leave_approver_mandatory_in_leave_application",
   "restrict_backdated_leave_application",
   "role_allowed_to_create_backdated_leave_application",
-  "column_break_29",
+  "sync_with_google_calendar",
+  "google_calendar",
+  "column_break_xmbz",
   "expense_approver_mandatory_in_expense_claim",
   "show_leaves_of_all_department_members_in_calendar",
   "auto_leave_encashment",
@@ -200,10 +202,6 @@
    "label": "Send Interview Feedback Reminder"
   },
   {
-   "fieldname": "column_break_29",
-   "fieldtype": "Column Break"
-  },
-  {
    "depends_on": "send_interview_feedback_reminder",
    "fieldname": "feedback_reminder_notification_template",
    "fieldtype": "Link",
@@ -316,13 +314,30 @@
    "fieldname": "attendance_settings_section",
    "fieldtype": "Section Break",
    "label": "Attendance Settings"
+  },
+  {
+   "default": "0",
+   "fieldname": "sync_with_google_calendar",
+   "fieldtype": "Check",
+   "label": "Sync With Google Calendar"
+  },
+  {
+   "fieldname": "column_break_xmbz",
+   "fieldtype": "Column Break"
+  },
+  {
+   "depends_on": "eval:doc.sync_with_google_calendar || doc.pulled_from_google_calendar",
+   "fieldname": "google_calendar",
+   "fieldtype": "Link",
+   "label": "Google Calendar",
+   "options": "Google Calendar"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2024-06-26 15:20:17.802079",
+ "modified": "2025-01-18 19:38:33.746947",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
