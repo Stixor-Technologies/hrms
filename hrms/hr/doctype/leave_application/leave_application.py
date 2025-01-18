@@ -2,6 +2,7 @@
 # License: GNU General Public License v3. See license.txt
 
 import datetime
+from datetime import timedelta
 
 import frappe
 from frappe import _
@@ -115,6 +116,12 @@ class LeaveApplication(Document, PWANotificationsMixin):
 			self.notify_employee()
 
 		self.create_leave_ledger_entry()
+
+		# Stixor: sync with Google Calendar if enabled and approved. Kept before the
+		# allocation check below so leaves without an allocation (e.g. unpaid) still sync.
+		if self.status == "Approved" and frappe.db.get_single_value("HR Settings", "sync_with_google_calendar"):
+			self.sync_with_google_calendar()
+
 		# create a reverse ledger entry for backdated leave applications for whom expiry entry already exists
 		leave_allocation = self.get_leave_allocation()
 		if not leave_allocation:
@@ -129,6 +136,39 @@ class LeaveApplication(Document, PWANotificationsMixin):
 			create_leave_ledger_entry(self, args)
 
 		self.reload()
+
+	def sync_with_google_calendar(self):
+		from frappe.integrations.doctype.google_calendar.google_calendar import get_google_calendar_object
+
+		google_settings_enabled = frappe.db.get_single_value("Google Settings", "enable")
+		if not google_settings_enabled:
+			frappe.throw(_("Google sync not enabled in Google Settings."))
+
+		g_calendar = frappe.db.get_single_value("HR Settings", "google_calendar")
+
+		google_calendar, account = get_google_calendar_object(g_calendar)
+
+		# Adjust the end date to include the actual end date
+		end_date = self.to_date + timedelta(days=1)
+
+		event = {
+			"summary": f"🌴 Leave: {self.employee_name}",
+			"description": f"Leave Type: {self.leave_type}",
+			"start": {
+				"date": self.from_date.strftime("%Y-%m-%d"),
+				"timeZone": "UTC",
+			},
+			"end": {
+				"date": end_date.strftime("%Y-%m-%d"),
+				"timeZone": "UTC",
+			},
+		}
+
+		try:
+			event = google_calendar.events().insert(calendarId=account.google_calendar_id, body=event).execute()
+			frappe.msgprint(_("Leave application synced with Google Calendar."))
+		except Exception as e:
+			frappe.throw(_("Failed to sync with Google Calendar: {0}").format(str(e)))
 
 	def before_cancel(self):
 		self.status = "Cancelled"

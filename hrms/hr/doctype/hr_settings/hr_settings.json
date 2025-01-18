@@ -29,6 +29,8 @@
   "leave_approver_mandatory_in_leave_application",
   "prevent_self_leave_approval",
   "show_leaves_of_all_department_members_in_calendar",
+  "sync_with_google_calendar",
+  "google_calendar",
   "column_break_29",
   "send_leave_notification",
   "leave_approval_notification_template",
@@ -392,6 +394,19 @@
    "fieldname": "show_org_chart_to_all_employees",
    "fieldtype": "Check",
    "label": "Show Organizational Chart to All Employees"
+  },
+  {
+   "default": "0",
+   "fieldname": "sync_with_google_calendar",
+   "fieldtype": "Check",
+   "label": "Sync With Google Calendar"
+  },
+  {
+   "depends_on": "eval:doc.sync_with_google_calendar",
+   "fieldname": "google_calendar",
+   "fieldtype": "Link",
+   "label": "Google Calendar",
+   "options": "Google Calendar"
   }
  ],
  "icon": "settings",
@@ -399,7 +414,7 @@
  "issingle": 1,
  "link_display_mode": "Search",
  "links": [],
- "modified": "2026-10-27 16:22:38.481405",
+ "modified": "2026-11-25 12:00:00.000000",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
